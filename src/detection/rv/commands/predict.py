@@ -25,9 +25,14 @@ from rv.commands.utils import (
 @click.option('--channel-order', nargs=3, type=int,
               default=planet_channel_order, help='Index of RGB channels')
 @click.option('--chip-size', default=300)
+@click.option('--invocation-metadata-uri',
+              help='JSON file to dump metadata about invoking this command')
+@click.option('--git-commit', default='unknown',
+              help='Git commit used when invoking this command. ' +
+                   'This is useful when using --invocation-metadata-uri')
 def predict(inference_graph_uri, label_map_uri, image_uris,
             agg_predictions_uri, agg_predictions_debug_uri, mask_uri,
-            channel_order, chip_size):
+            channel_order, chip_size, invocation_metadata_uri, git_commit):
     """High-level script for running object detection over geospatial imagery.
 
     Args:
@@ -36,6 +41,8 @@ def predict(inference_graph_uri, label_map_uri, image_uris,
     """
     temp_dir = '/opt/data/temp/'
     make_temp_dir(temp_dir)
+
+    save_invocation_metadata(invocation_metadata_uri, temp_dir, git_commit)
 
     # Download input files if needed.
     inference_graph_path = download_if_needed(temp_dir, inference_graph_uri)
