@@ -7,7 +7,7 @@ import signal
 from ctypes import cdll
 from time import sleep
 import json
-import pandas
+import sys
 
 import numpy as np
 import boto3
@@ -210,3 +210,34 @@ def translate_boxlist(boxlist, x_offset, y_offset):
         translated_boxlist.add_field(field, extra_field_data)
 
     return translated_boxlist
+
+
+def _save_invocation_metadata(path, git_commit):
+    """Save metadata about invoking a script to a local path.
+
+    Args:
+        path: path to write metadata to
+        git_commit: string with git commit of code that was run
+    """
+    command = ' '.join(sys.argv)
+    metadata = {
+        'git_commit': git_commit,
+        'command': command
+    }
+    with open(path, 'w') as metadata_file:
+        json.dump(metadata, metadata_file, indent=4)
+
+
+def save_invocation_metadata(invocation_metadata_uri, temp_dir,
+                             git_commit):
+    """Save metadata about invoking a script.
+
+    Args:
+        invocation_metadata_uri: URI for where to put metadata
+        temp_dir: path to temporary directory used if URI is remote
+        git_commit: string with git commit of code that was run
+    """
+    invocation_metadata_path = get_local_path(
+        temp_dir, invocation_metadata_uri)
+    _save_invocation_metadata(invocation_metadata_path, git_commit)
+    upload_if_needed(invocation_metadata_path, invocation_metadata_uri)

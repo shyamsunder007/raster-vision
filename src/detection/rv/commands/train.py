@@ -8,7 +8,8 @@ from urllib.parse import urlparse
 import click
 
 from rv.commands.utils import (
-    download_if_needed, make_temp_dir, on_parent_exit, sync_dir)
+    download_if_needed, make_temp_dir, on_parent_exit, sync_dir,
+    save_invocation_metadata)
 
 
 @click.command()
@@ -18,8 +19,13 @@ from rv.commands.utils import (
 @click.argument('train_uri')
 @click.option('--sync-interval', default=600,
               help='Interval in seconds for syncing training dir')
+@click.option('--invocation-metadata-uri',
+              help='JSON file to dump metadata about invoking this command')
+@click.option('--git-commit', default='unknown',
+              help='Git commit used when invoking this command. ' +
+                   'This is useful when using --invocation-metadata-uri')
 def train(config_path, dataset_uri, model_checkpoint_uri, train_uri,
-          sync_interval):
+          sync_interval, invocation_metadata_uri, git_commit):
     """Train an object detection model.
 
     Args:
@@ -30,6 +36,8 @@ def train(config_path, dataset_uri, model_checkpoint_uri, train_uri,
     temp_dir = '/opt/data/temp/'
     download_dir = '/opt/data/'
     make_temp_dir(temp_dir)
+
+    save_invocation_metadata(invocation_metadata_uri, temp_dir, git_commit)
 
     train_root_dir = download_if_needed(
         temp_dir, train_uri, must_exist=False)
