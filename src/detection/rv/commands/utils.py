@@ -101,7 +101,9 @@ def download_if_needed(download_dir, uri, must_exist=True):
 
     path = get_local_path(download_dir, uri)
     parsed_uri = urlparse(uri)
+    print('a')
     if parsed_uri.scheme == 's3':
+        print('b')
         makedirs(dirname(path), exist_ok=True)
         try:
             print('Downloading {} to {}'.format(uri, path))
